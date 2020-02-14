@@ -1,7 +1,6 @@
 
 
 const urlBase = 'https://raw.githubusercontent.com/quenting44/desinformation/master/data/parsed/';
-// const urlBase = 'https://raw.githubusercontent.com/willisk/D3DataVis/master/data/parsed/';
 // const urlBase = 'http://localhost:4000/Project-Data-Visualization/';
 
 
@@ -60,7 +59,7 @@ function DatasetSelector(data) {
         var sheetVal = $('#sheetSelect option:selected').val();
 
         //rubrics
-        let rubrics = data[volumeVal][sheetVal].inquiry.map(inq => inq.key);
+        let rubrics = Object.keys(data[volumeVal][sheetVal].data);
         var rubricOptions = rubricSelect.selectAll("option")
             .data(rubrics)
 
@@ -72,7 +71,7 @@ function DatasetSelector(data) {
             .merge(rubricOptions)
             .text(d => d)
 
-        var rubricVal = $('#rubricSelect option:selected').index();
+        var rubricVal = $('#rubricSelect option:selected').val();
 
         this.updateCallBack(volumeVal, sheetVal, rubricVal, isInit);
     }
@@ -163,8 +162,8 @@ $.getJSON(urlBase + 'all.json', (data) => {
 
     all = data; //for debugging
 
-    filterGroup(data["fl_464_Volume_A"], 'UE28');
-    filterGroup(data["fl_464_Volume_B"], 'UE28');
+    filterGroup(data["fl_464_Volume_A"], 'UE28\nEU28');
+    filterGroup(data["fl_464_Volume_B"], 'UE28\nEU28');
 
 
 
@@ -179,23 +178,31 @@ $.getJSON(urlBase + 'all.json', (data) => {
     sel = new DatasetSelector(data);
     sel.updateCallBack = function (volumeVal, sheetVal, rubricVal, isInit) {
         let sheet = data[volumeVal][sheetVal];
-        let groups = sheet.groups.map(d => d.name);
+        let groups = sheet.groups;
+        // console.log(sheet, groups)
+        // console.log('XXXXX');
+        // console.log(volumeVal, sheetVal, rubricVal);
 
-        let barData = sheet.inquiry[rubricVal].data[0];
+        let barData = Object.values(sheet.data[rubricVal]);
         let speed = isInit ? 0 : 500;
         bChart.updateGraph(barData, groups, speed);
 
-        var radarData = sheet.groups.map(function (d, i) {
-            return {
-                name: d.name,
-                axes: sheet.inquiry.map(function (d) {
-                    return {
-                        axis: d.key,
-                        value: d.data[0][i]
-                    };
-                })
-            };
-        });
+        var radarData = [];
+        let sheetData = transpose(sheet.data);
+        console.log(sheetData);
+        for (let key of Object.keys(sheetData)) {
+            let row = {};
+            row.name = key;
+            row.axes = [];
+            for (let keyCol of Object.keys(sheetData[key])) {
+                let col = {};
+                col.axis = keyCol;
+                col.value = sheetData[key][keyCol];
+                row.axes.push(col);
+            }
+            radarData.push(row);
+        }
+        console.log(radarData);
         let svg_radar2 = RadarChart(".radarChart2", radarData, radarChartOptions);
     };
     sel.init();

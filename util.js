@@ -1,29 +1,47 @@
 
-function groupIdx(sheet, findGroup) {
-    for (let i in sheet.groups) {
-        let group = sheet.groups[i];
-        if (group.name.includes(findGroup) || group.nameFr.includes(findGroup))
-            return i;
-    }
-    return -1;
-}
+// function groupIdx(sheet, findGroup) {
+//     for (let i in sheet.groups) {
+//         let group = sheet.groups[i];
+//         if (group.name.includes(findGroup) || group.nameFr.includes(findGroup))
+//             return i;
+//     }
+//     return -1;
+// }
+
+// function findGroupKey(groups, substr) {
+//     for (let g of groups)
+//         if (g.includes(substr))
+//             return g;
+//     return '';
+// }
 
 function filterGroup(volume, filterGroup) {
     for (let sheet of Object.values(volume)) {
-        let idx = groupIdx(sheet, filterGroup);
-        for (let data of sheet.data)
-            if (data.hasOwnProperty(filterGroup))
-                delete data[filterGroup];
-        if (idx != -1) {
-            sheet.groups.splice(idx, 1);    //remove group
-            for (inq of sheet.inquiry) {
-                inq.data[0].splice(idx, 1); //remove data
-                if (inq.data[1])
-                    inq.data[1].splice(idx, 1); //remove data
-            }
+        if (sheet.data.hasOwnProperty(filterGroup)) // filtering row
+            delete sheet.data[filterGroup];
+        else {   // filtering column
+            for (let data of Object.values(sheet.data))
+                if (data.hasOwnProperty(filterGroup))
+                    delete data[filterGroup];
+            for (let i in sheet.groups)
+                if (sheet.groups[i] == filterGroup)
+                    sheet.groups.splice(i, 1);
         }
     }
 }
+
+function transpose(data) {
+    let res = {};
+    for (let row of Object.keys(data)) {
+        for (let col of Object.keys(data[row])) {
+            if (!res.hasOwnProperty(col))
+                res[col] = {};
+            res[col][row] = data[row][col];
+        }
+    }
+    return res;
+}
+
 
 function loadDataFull(urlBase) {
 
