@@ -1,73 +1,308 @@
 
 
-const urlBase = 'https://raw.githubusercontent.com/quenging44/desinformation/master/';
-
-loadData(urlBase)
-    .then((data) => {
-        console.log(data);
-    });
-
-var svg = d3.select("body").append("svg");
-
-// var margin = { top: 20, right: 20, bottom: 20, left: 20 },
-//     padding = { top: 60, right: 60, bottom: 60, left: 60 },
-//     outerWidth = 960,
-//     outerHeight = 500,
-//     innerWidth = outerWidth - margin.left - margin.right,
-//     innerHeight = outerHeight - margin.top - margin.bottom,
-//     width = innerWidth - padding.left - padding.right,
-//     height = innerHeight - padding.top - padding.bottom;
-
-// var x = d3.scale.identity()
-//     .domain([0, width]);
-
-// var y = d3.scale.identity()
-//     .domain([0, height]);
+const urlBase = 'https://raw.githubusercontent.com/quenting44/desinformation/master/data/parsed/';
+// const urlBase = 'http://localhost:4000/Project-Data-Visualization/';
 
 
 
-function plotInquiry(data) {
-    pieChart(data);
+
+// --------------------------------------------------
+// Drop-Down Selectors
+// --------------------------------------------------
+
+function DatasetSelector(data) {
+    var body = d3.select('body');
+    body.append('span').html('<br>Volume:<br>')
+
+    var volumeSelect = body.append("select")
+        .attr("id", "volumeSelect")
+
+    body.append('span').html('<br><br>Sheet:<br>')
+
+    var sheetSelect = body.append("select")
+        .attr("id", "sheetSelect")
+
+    body.append('span').html('<br>Rubric:<br>')
+
+    var rubricSelect = body.append("select")
+        .attr("id", "rubricSelect")
+
+    this.updateCallBack = function (volumeVal, sheetVal, rubricVal, speed, isInit) { }
+
+    this.init = function () {
+        this.update(true);
+    }
+
+    this.update = function (isInit = false) {
+
+        volumeSelect.selectAll("option")
+            .data(Object.keys(data))
+            .enter().append("option")
+            .text(d => d)
+
+        var volumeVal = $('#volumeSelect option:selected').val();   //XXX try not using jQuery
+
+        //sheets
+        let sheets = Object.keys(data[volumeVal]);
+        var sheetOptions = sheetSelect.selectAll("option")
+            .data(sheets)
+
+        sheetOptions.exit()
+            .remove()
+
+        sheetOptions.enter()
+            .append("option")
+            .merge(sheetOptions)
+            .text(d => `${data[volumeVal][d].phrase}`.replace(/([^\(]+).*/, '$1'))
+            .property('value', d => d)
+
+        var sheetVal = $('#sheetSelect option:selected').val();
+
+        //rubrics
+        let rubrics = Object.keys(data[volumeVal][sheetVal].data);
+        var rubricOptions = rubricSelect.selectAll("option")
+            .data(rubrics)
+
+        rubricOptions.exit()
+            .remove();
+
+        rubricOptions.enter()
+            .append("option")
+            .merge(rubricOptions)
+            .text(d => d)
+
+        var rubricVal = $('#rubricSelect option:selected').val();
+
+        this.updateCallBack(volumeVal, sheetVal, rubricVal, isInit);
+    }
+
+    volumeSelect.on("change", this.update.bind(this))
+    sheetSelect.on("change", this.update.bind(this))
+    rubricSelect.on("change", this.update.bind(this))
 }
 
-function pieChart(data) {
+// --------------------------------------------------
+// Bar Chart
+// --------------------------------------------------
 
-    // set the dimensions and margins of the graph
-    margin = 40
+function BarChart(svg) {
 
-    // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
-    var radius = Math.min(width, height) / 2 - margin
+    var margin = { top: 20, right: 20, bottom: 100, left: 50 };
+    var width = svg.attr("width") - margin.left - margin.right;
+    var height = svg.attr("height") - margin.top - margin.bottom;
+    var g = svg.append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    svg
-        .append("g")
-        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+    var x = d3.scaleBand()
+        .rangeRound([0, width])
+        .padding(0.1);
 
-    // Create dummy data
-    var data = { a: 9, b: 20, c: 30, d: 8, e: 12 }
+    var y = d3.scaleLinear()
+        .rangeRound([height, 0]);
 
-    // set the color scale
-    var color = d3.scaleOrdinal()
-        .domain(data)
-        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
+    var xAxis = g.append("g")
+        .attr("transform", "translate(0," + height + ")")
 
-    // Compute the position of each group on the pie:
-    var pie = d3.pie()
-        .value(function (d) { return d.value; })
-    var data_ready = pie(d3.entries(data))
+    var yAxis = g.append("g");
 
-    // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-    svg
-        .selectAll('whatever')
-        .data(data_ready)
-        .enter()
-        .append('path')
-        .attr('d', d3.arc()
-            .innerRadius(0)
-            .outerRadius(radius)
-        )
-        .attr('fill', function (d) { return (color(d.data.key)) })
-        .attr("stroke", "black")
-        .style("stroke-width", "2px")
-        .style("opacity", 0.7)
+    this.updateGraph = function (data, xLabels, speed = 500) {
 
+        //update axes
+        x.domain(xLabels);
+        y.domain([0, d3.max(data)]);
+
+        xAxis
+            .call(d3.axisBottom(x))
+            .selectAll('text')
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", "-.55em")
+            .attr("transform", "rotate(-90)");
+
+        yAxis
+            .call(d3.axisLeft(y))
+
+        //update bars
+        var bars = g.selectAll(".bar")
+            .data(data)
+
+        bars
+            .exit().remove();
+        bars
+            .enter().append("rect")
+            .merge(bars)
+            .attr("class", "bar")
+            .transition().duration(speed)
+            .attr("x", (d, i) => x(xLabels[i]))
+            .attr("y", d => y(d))
+            .attr("width", x.bandwidth())
+            .attr("height", d => height - y(d));
+    }
 }
+
+var margin = { top: 50, right: 80, bottom: 50, left: 80 },
+    width = Math.min(400, window.innerWidth / 4) - margin.left - margin.right,
+    height = Math.min(width, window.innerHeight - margin.top - margin.bottom);
+
+var radarChartOptions = {
+    w: 650,
+    h: 350,
+    margin: margin,
+    maxValue: 60,
+    levels: 6,
+    roundStrokes: false,
+    // color: d3.scaleOrdinal().range(["#AFC52F", "#ff6600", "#2a2fd4"]),
+    format: '.0f',
+    legend: { title: '', translateX: 100, translateY: 40 },
+    unit: ''
+};
+
+var all;
+$.getJSON(urlBase + 'all.json', (data) => {
+
+    all = data; //for debugging
+
+    filterGroup(data["fl_464_Volume_A"], 'UE28\nEU28');
+    filterGroup(data["fl_464_Volume_B"], 'UE28\nEU28');
+
+
+
+    var body = d3.select('body');
+
+    var svg = body.append('svg')
+        .attr('width', 650)
+        .attr('height', 400)
+
+    var bChart = new BarChart(svg);
+
+    sel = new DatasetSelector(data);
+    sel.updateCallBack = function (volumeVal, sheetVal, rubricVal, isInit) {
+        let sheet = data[volumeVal][sheetVal];
+        let groups = sheet.groups;
+        // console.log(sheet, groups)
+        // console.log('XXXXX');
+        // console.log(volumeVal, sheetVal, rubricVal);
+
+        let barData = Object.values(sheet.data[rubricVal]);
+        let speed = isInit ? 0 : 500;
+        bChart.updateGraph(barData, groups, speed);
+
+        var radarData = [];
+        let sheetData = transpose(sheet.data);
+        console.log(sheetData);
+        for (let key of Object.keys(sheetData)) {
+            let row = {};
+            row.name = key;
+            row.axes = [];
+            for (let keyCol of Object.keys(sheetData[key])) {
+                let col = {};
+                col.axis = keyCol;
+                col.value = sheetData[key][keyCol];
+                row.axes.push(col);
+            }
+            radarData.push(row);
+        }
+        console.log(radarData);
+        let svg_radar2 = RadarChart(".radarChart2", radarData, radarChartOptions);
+    };
+    sel.init();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------
+// Radar Chart
+// --------------------------------------------------
+//////////////////////////////////////////////////////////////
+//////////////////////// Set-Up //////////////////////////////
+//////////////////////////////////////////////////////////////
+
+// //////////////////////////////////////////////////////////////
+// ////////////////////////// Data //////////////////////////////
+// //////////////////////////////////////////////////////////////
+
+// var data = [
+//     {
+//         name: 'Allocated budget',
+//         axes: [
+//             { axis: 'Sales', value: 42 },
+//             { axis: 'Marketing', value: 20 },
+//             { axis: 'Development', value: 60 },
+//             { axis: 'Customer Support', value: 26 },
+//             { axis: 'Information Technology', value: 35 },
+//             { axis: 'Administration', value: 20 }
+//         ],
+//     },
+//     {
+//         name: 'Actual Spending',
+//         axes: [
+//             { axis: 'Sales', value: 50 },
+//             { axis: 'Marketing', value: 45 },
+//             { axis: 'Development', value: 20 },
+//             { axis: 'Customer Support', value: 20 },
+//             { axis: 'Information Technology', value: 25 },
+//             { axis: 'Administration', value: 23 }
+//         ],
+//     },
+//     {
+//         name: 'blah Test',
+//         axes: [
+//             { axis: 'Sales', value: 32 },
+//             { axis: 'Marketing', value: 62 },
+//             { axis: 'Development', value: 35 },
+//             { axis: 'Customer Support', value: 10 },
+//             { axis: 'Information Technology', value: 20 },
+//             { axis: 'Administration', value: 28 }
+//         ],
+//     }
+// ];
+
+// //////////////////////////////////////////////////////////////
+// ///// Second example /////////////////////////////////////////
+// ///// Chart legend, custom color, custom unit, etc. //////////
+// //////////////////////////////////////////////////////////////
+
+// // Draw the chart, get a reference the created svg element :
+// let svg_radar2 = RadarChart(".radarChart2", data, radarChartOptions2);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
