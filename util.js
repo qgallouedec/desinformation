@@ -10,8 +10,10 @@ function groupIdx(sheet, findGroup) {
 
 function filterGroup(volume, filterGroup) {
     for (let sheet of Object.values(volume)) {
-        let groups
         let idx = groupIdx(sheet, filterGroup);
+        for (let data of sheet.data)
+            if (data.hasOwnProperty(filterGroup))
+                delete data[filterGroup];
         if (idx != -1) {
             sheet.groups.splice(idx, 1);    //remove group
             for (inq of sheet.inquiry) {

@@ -160,9 +160,12 @@ function parseXls(fileName) {
         var groupMeta = {}, groupMetaFr = {};
         if (groupMetaRowIdx != groupRowIdx) {
             groupMetaFr = header[groupMetaRowIdx];
-            groupMeta = groupMetaFr;
 
-            let groupMetaRowEng = header[groupMetaRowIdx + 2];  // XXX always assume eng version is 2 below french ?
+            groupMeta = {};
+            for (let key of Object.keys(groupMetaFr))   // copy
+                groupMeta[key] = groupMetaFr[key];
+
+            let groupMetaRowEng = header[groupMetaRowIdx + 2];  // override eng, XXX always assume eng version is 2 below french ?
             for (let key of Object.keys(groupMetaRowEng))
                 groupMeta[key] = groupMetaRowEng[key];
 
