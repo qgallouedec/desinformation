@@ -17,8 +17,8 @@
 </head>
 
 <body>
-  <button onclick="choose('radio')">Les journaux ou magazines d'information imprimés</button>
-  <button onclick="choose('reseau')">Les journaux ou magazines d'information en ligne</button>
+  <button onclick="choose('journaux_mag_online')">Les journaux ou magazines d'information imprimés</button>
+  <button onclick="choose('journaux_mag_papier')">Les journaux ou magazines d'information en ligne</button>
 
   <script>
     var nation_to_link = {
@@ -65,93 +65,103 @@
       height = window_height - margin.top - margin.bottom;
 
     var flag_space = 40;
-    var top_n = 6;
+    var top_n = 3;
 
     // Ajout d'un element svg au body
     var svg = d3.select("body").append("svg")
       .attr("width", window_width)
       .attr("height", window_height)
 
-    function choose(media_type) {
-      // Ouverture du fichier
-      d3.csv("https://raw.githubusercontent.com/quenting44/desinformation/master/data/journaux_mag_online.csv", function (data) {
 
-        data_sorted = data.slice(); // On store une version triée de dataset
-        data_sorted.sort(function (d1, d2) { return d2["Total 'Trust'"] - d1["Total 'Trust'"] })
+    // Ouverture du fichier
+    //https://raw.githubusercontent.com/quenting44/desinformation/master/data/journaux_mag_papier.csv
+    d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/master/data/journaux_mag_online.csv', function (data) {
 
-        // Les fonctions de mapping
-        var vertical_scale = d3.scaleLinear()
-          .domain([0, data.length])
-          .range([margin.top, height + margin.top])
+      data_sorted = data.slice(); // On store une version triée de dataset
+      data_sorted.sort(function (d1, d2) { return d2["Total 'Trust'"] - d1["Total 'Trust'"] })
 
-        var horizontal_bar_scale = d3.scaleLinear()
-          .domain([0, 1])
-          .range([0, width - flag_space])
+      // Les fonctions de mapping
+      var vertical_scale = d3.scaleLinear()
+        .domain([0, data.length])
+        .range([margin.top, height + margin.top])
 
-        var rect_height = height / (data.length + 5);
+      var horizontal_bar_scale = d3.scaleLinear()
+        .domain([0, 1])
+        .range([0, width - flag_space])
 
-        var color_scale = d3.scaleLinear().domain([0, 4]).range(['green', 'red']);
+      var rect_height = height / (data.length + 5);
 
-        // Les réponses possibles
-        var answers = ["Totally trust", "Tend to trust", "DKNA", "Tend not to trust", "Do not trust at all"];
+      var color_scale = d3.scaleLinear().domain([0, 4]).range(['green', 'red']);
 
-        // Les pourcentages cumulé jusqu'à la réponse i_ans
-        function cumul_percent(d, i_ans) {
-          var x = 0
-          for (var ii_ans = 0; ii_ans < i_ans; ii_ans++) {
-            x = x + d[answers[ii_ans]] * 1;
-          }
-          return x;
+      // Les réponses possibles
+      var answers = ["Totally trust", "Tend to trust", "DKNA", "Tend not to trust", "Do not trust at all"];
+
+      // Les pourcentages cumulé jusqu'à la réponse i_ans
+      function cumul_percent(d, i_ans) {
+        var x = 0
+        for (var ii_ans = 0; ii_ans < i_ans; ii_ans++) {
+          x = x + d[answers[ii_ans]] * 1;
         }
+        return x;
+      }
 
-        // Nouvel index en fonction de la liste triée
-        function new_i(d, i_ans) {
-          return data_sorted.indexOf(d);
+      // Nouvel index en fonction de la liste triée
+      function new_i(d, i_ans) {
+        return data_sorted.indexOf(d);
+      }
+
+      function hidden_or_not(d, i_country) {
+        var sorted_i = new_i(d, i_country);
+
+        if (sorted_i < top_n || sorted_i > 28 - top_n || d["Country"] == "UE29") {
+          return rect_height;
         }
+        return 0;
+      }
 
-        function hidden_or_not(d, i_country) {
-          var sorted_i = new_i(d, i_country);
 
-          if (sorted_i < top_n || sorted_i > 28 - top_n || d["Country"] == "UE29") {
-            return rect_height;
-          }
-          return 0;
+      function find_a_name(d, i_country) {
+        var sorted_i = new_i(d, i_country);
+        if (sorted_i < top_n) {
+          return sorted_i;
         }
-
-
-        function find_a_name(d, i_country) {
-          var sorted_i = new_i(d, i_country);
-          if (sorted_i < top_n) {
-            return sorted_i;
-          }
-          if (sorted_i > 28 - top_n) {
-            return sorted_i - (28 - 2 * top_n - 1);
-          }
-          return top_n + 0.5;
+        if (sorted_i > 28 - top_n) {
+          return sorted_i - (28 - 2 * top_n - 1);
         }
+        return top_n + 0.5;
+      }
 
-
-        for (var i_ans = 0; i_ans < answers.length; i_ans++) {
-          svg.selectAll(answers[i_ans]).data(data).enter()
-            .append("rect")
-            .attr("x", function (d, i_country) { return margin.left + flag_space + horizontal_bar_scale(cumul_percent(d, i_ans)); })
-            .attr("y", function (d, i_country) { return vertical_scale(find_a_name(d, i_country)); })
-            .attr("width", function (d, i_country) { return horizontal_bar_scale(d[answers[i_ans]]); })
-            .attr("height", hidden_or_not)
-            .style("fill", color_scale(i_ans)) // Pour enlever le remplissage
-            .style("stroke", "none") // Pour les contours noirs
-        }
-
-        svg.selectAll('flag').data(data).enter()
-          .append("svg:image")
-          .attr("x", margin.left)
+      for (var i_ans = 0; i_ans < answers.length; i_ans++) {
+        svg.selectAll(answers[i_ans]).data(data).enter()
+          .append("rect")
+          .attr("x", function (d, i_country) { return margin.left + flag_space + horizontal_bar_scale(cumul_percent(d, i_ans)); })
           .attr("y", function (d, i_country) { return vertical_scale(find_a_name(d, i_country)); })
-          .attr('width', 24)
-          .attr('height', hidden_or_not)
-          .attr("xlink:href", function (d, i_country) { return nation_to_link[d['Country']]; })
+          .attr("width", function (d, i_country) { return horizontal_bar_scale(d[answers[i_ans]]); })
+          .attr("height", hidden_or_not)
+          .style("fill", color_scale(i_ans)) // Pour enlever le remplissage
+          .style("stroke", "none") // Pour les contours noirs
+          .transition()
+          .delay(1000)
+      }
 
-      })
+      svg.selectAll('flag').data(data).enter()
+        .append("svg:image")
+        .attr("x", margin.left)
+        .attr("y", function (d, i_country) { return vertical_scale(find_a_name(d, i_country)); })
+        .attr('width', 24)
+        .attr('height', hidden_or_not)
+        .attr("xlink:href", function (d, i_country) { return nation_to_link[d['Country']]; })
+    })
+
+    function choose(media_type) {
+      setInterval(function (d) {
+        svg.selectAll("rect").data(data).transition()
+          .attr("height", function (d) { return y(d); })
+          .attr("y", function (d) { return 200 - y(d); })
+
+      }, 500);
+
     }
-    choose('radio')
+    //choose('journaux_mag_online')
   </script>
 </body>
