@@ -2,19 +2,204 @@
 
 <head>
   <meta charset="utf-8">
-
-  <!-- <link rel="stylesheet" type="text/css" href="./style.css"> -->
-
-  <script src="https://d3js.org/d3.v5.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
-    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
-  <!-- <script src="./lib/d3.v5.js"></script>
-  <script src="./lib/jquery-3.4.1.js"></script> -->
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <style>
+    body {
+      background-color: rgb(206, 206, 206);
+      margin: 0;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+    }
+  </style>
 </head>
 
 <body>
-  <div class="radarChart2" style="display: inline-flex;"></div>
-  <script src="./radarChart.js"></script>
-  <script src="./util.js"></script>
-  <script src="./main.js"></script>
+  <button onclick="update_draw('journaux_mag_online')">Les journaux ou magazines d'information imprimés</button>
+  <button onclick="update_draw('journaux_mag_papier')">Les journaux ou magazines d'information en ligne</button>
+
+  <script>
+    //---------------------------------------- VARIABLES ----------------------------------------
+    var nation_to_link = {
+      'UE29': "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Flag_of_Europe.svg/1200px-Flag_of_Europe.svg.png",
+      'BE': "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Flag_of_Belgium.svg/1200px-Flag_of_Belgium.svg.png",
+      'BG': "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Bulgaria.svg/1200px-Flag_of_Bulgaria.svg.png",
+      'CZ': "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Flag_of_the_Czech_Republic.svg/1200px-Flag_of_the_Czech_Republic.svg.png",
+      'DK': "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Flag_of_Denmark.svg/1200px-Flag_of_Denmark.svg.png",
+      'DE': "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/1200px-Flag_of_Germany.svg.png",
+      'EE': "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Flag_of_Estonia.svg/1200px-Flag_of_Estonia.svg.png",
+      'IE': "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Flag_of_Ireland.svg/1200px-Flag_of_Ireland.svg.png",
+      'EL': "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Flag_of_Greece.svg/1200px-Flag_of_Greece.svg.png",
+      'ES': "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Flag_of_Spain.svg/1200px-Flag_of_Spain.svg.png",
+      'FR': "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Flag_of_France.svg/1200px-Flag_of_France.svg.png",
+      'HR': "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Flag_of_Croatia.svg/1200px-Flag_of_Croatia.svg.png",
+      'IT': "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Flag_of_Italy.svg/1200px-Flag_of_Italy.svg.png",
+      'CY': "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Flag_of_Cyprus.svg/1200px-Flag_of_Cyprus.svg.png",
+      'LV': "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Flag_of_Latvia.svg/1200px-Flag_of_Latvia.svg.png",
+      'LT': "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Flag_of_Lithuania.svg/1200px-Flag_of_Lithuania.svg.png",
+      'LU': "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Flag_of_Luxembourg.svg/1200px-Flag_of_Luxembourg.svg.png",
+      'HU': "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Flag_of_Hungary.svg/1200px-Flag_of_Hungary.svg.png",
+      'MT': "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Flag_of_Malta.svg/1200px-Flag_of_Malta.svg.png",
+      'NL': "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Flag_of_the_Netherlands.svg/1200px-Flag_of_the_Netherlands.svg.png",
+      'AT': "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Flag_of_Austria.svg/1200px-Flag_of_Austria.svg.png",
+      'PL': "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Flag_of_Poland.svg/1200px-Flag_of_Poland.svg.png",
+      'PT': "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Flag_of_Portugal.svg/1200px-Flag_of_Portugal.svg.png",
+      'RO': "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Flag_of_Romania.svg/1200px-Flag_of_Romania.svg.png",
+      'SI': "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Flag_of_Slovenia.svg/1200px-Flag_of_Slovenia.svg.png",
+      'SK': "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Flag_of_Slovakia.svg/1200px-Flag_of_Slovakia.svg.png",
+      'FI': "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Flag_of_Finland.svg/1200px-Flag_of_Finland.svg.png",
+      'UK': "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Flag_of_the_United_Kingdom.svg/1200px-Flag_of_the_United_Kingdom.svg.png",
+      'SE': "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Flag_of_Sweden.svg/1200px-Flag_of_Sweden.svg.png",
+    }
+    var margin = { top: 40, right: 20, bottom: 30, left: 20 };
+    var window_width = 960;
+    var window_height = 700;
+    var width = window_width - margin.left - margin.right;
+    var height = window_height - margin.top - margin.bottom;
+    var flag_space = 40;
+    var flag_margin = 5;
+    var top_n = 4;
+    var rect_height = (height - 300) / (top_n + 5);
+    var answers = ["Totally trust", "Tend to trust", "DKNA", "Tend not to trust", "Do not trust at all"];
+
+    // ---------------------------------------- SCALES ----------------------------------------
+    var horizontal_bar_scale = d3.scaleLinear()
+      .domain([0, 1])
+      .range([margin.left + flag_space, width + margin.left])
+
+    var vertical_scale = d3.scaleLinear()
+      .domain([0, top_n * 2 + 2])
+      .range([margin.top, height + margin.top])
+
+    var color_scale = d3.scaleLinear().domain([0, 4]).range(['green', 'red']);
+
+    // ---------------------------------------- FUNCTION ----------------------------------------
+    function compute_rect_height(data, i_country) {
+      var d = data[i_country]
+      var data_sorted = data.slice(); // On store une version triée de dataset
+      data_sorted.sort(function (d1, d2) { return d2["Total 'Trust'"] - d1["Total 'Trust'"] })
+      var sorted_i = data_sorted.indexOf(d);
+
+      if (sorted_i < top_n || sorted_i > 28 - top_n || d["Country"] == "UE29") {// The country is displayed only if this conditions are True
+        return rect_height;
+      }
+      else {
+        return 0;
+      }
+    }
+
+    function i_country_to_vertical_i(data, i_country) {
+      var d = data[i_country]
+      var data_sorted = data.slice(); // On store une version triée de dataset
+      data_sorted.sort(function (d1, d2) { return d2["Total 'Trust'"] - d1["Total 'Trust'"] })
+      var sorted_i = data_sorted.indexOf(d);
+      if (sorted_i < top_n) {
+        return sorted_i;
+      }
+      else if (sorted_i > 28 - top_n) {
+        return sorted_i - (28 - 2 * top_n - 1);
+      }
+      else if (d["Country"] == "UE29") {
+        return top_n + 0.5;
+      }
+      else {
+        return top_n + 0.5;
+      }
+    }
+
+    // ---------------------------------------- SVG ----------------------------------------
+    // Ajout d'un element svg au body
+    var svg = d3.select("body").append("svg")
+      .attr("width", window_width)
+      .attr("height", window_height)
+      .append("g")
+
+    function draw_rect(data) {
+
+      var stack = d3.stack().keys(answers);
+      stack.value(function (d, key) {
+        return +d[key];
+      });
+
+      var layers = stack(data);
+
+      svg.selectAll("g")
+        .data(layers)
+        .enter().append("g")
+        .style("fill", function (d, i_ans) { return color_scale(i_ans); })
+        .selectAll("rect")
+        .data(function (d) { return d; })
+        .enter().append("rect")
+        .attr("x", horizontal_bar_scale(0))
+        .attr("y", function (d, i_country) { return vertical_scale(i_country_to_vertical_i(data, i_country)); })
+        .attr("width", 0)
+        .attr("height", function (d, i_country) { return compute_rect_height(data, i_country); })
+        .on("mouseover", function () {
+          d3.selectAll('rect').style("fill-opacity", "0.75");
+          d3.select(this).style("fill-opacity", "1");
+        })
+        .on("mouseout", function () {
+          d3.selectAll('rect').style("fill-opacity", "1");
+        });
+
+      svg.selectAll("g")
+        .data(layers)
+        .selectAll("rect")
+        .data(function (d) { return d; })
+        .transition()
+        .duration(2000)
+        .attr("width", function (d, i_country) { return horizontal_bar_scale(d[1]) - horizontal_bar_scale(d[0]); })
+        .attr("x", function (d) { return horizontal_bar_scale(d[0]); })
+
+
+      svg.selectAll('flag').data(data).enter()
+        .append("svg:image")
+        .attr("x", margin.left)
+        .attr("y", function (d, i_country) { return vertical_scale(i_country_to_vertical_i(data, i_country)); })
+        .attr('width', flag_space - flag_margin)
+        .attr("height", function (d, i_country) { return compute_rect_height(data, i_country); })
+        .attr("xlink:href", function (d, i_country) { return nation_to_link[d['Country']]; })
+    }
+
+    // ---------------------------------------- SHAPES ----------------------------------------
+    function draw(media_type) {
+      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/master/data/' + media_type + '.csv', function (data) {
+        draw_rect(data)
+      })
+    }
+
+    draw('journaux_mag_online');
+
+
+
+    function update_draw(media_type) {
+      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/master/data/' + media_type + '.csv', function (data) {
+        var stack = d3.stack().keys(answers);
+        stack.value(function (d, key) {
+          return +d[key];
+        });
+
+        var layers = stack(data);
+
+        svg.selectAll("g")
+          .data(layers)
+          .selectAll("rect")
+          .data(function (d) { return d; })
+          .transition()
+          .duration(1000)
+          .attr("x", function (d) { return horizontal_bar_scale(d[0]); })
+          .attr("y", function (d, i_country) { return vertical_scale(i_country_to_vertical_i(data, i_country)); })
+          .attr("width", function (d, i_country) { return horizontal_bar_scale(d[1]) - horizontal_bar_scale(d[0]); })
+          .attr("height", function (d, i_country) { return compute_rect_height(data, i_country); })
+
+        svg.selectAll('image').data(data)
+          .transition()
+          .duration(1000)
+          .attr("y", function (d, i_country) { return vertical_scale(i_country_to_vertical_i(data, i_country)); })
+          .attr("height", function (d, i_country) { return compute_rect_height(data, i_country); })
+      })
+    }
+  </script>
 </body>
