@@ -2,3 +2,5 @@ watch.rb
 .*
 !/.gitignore
 
+data/brut*
+
