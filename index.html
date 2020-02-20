@@ -259,7 +259,7 @@
       ]
     }
 
-    d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data_devices.csv', function (data) {
+    d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data/data_devices.csv', function (data) {
       var my_data = data.filter(function (d) {
         return d["Country"] == "FR" && d["Media"] == "Les journaux ou magazines d'information en ligne" && d["Answer"] == "Tend to trust";
       })[0]
@@ -282,7 +282,7 @@
     })
 
     function update_radar_chart(country, media, answer) {
-      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data_devices.csv', function (data) {
+      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data/data_devices.csv', function (data) {
         var my_data = data.filter(function (d) {
           return d["Country"] == country && d["Media"] == media && d["Answer"] == answer;
         })[0]
