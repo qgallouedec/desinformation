@@ -19,6 +19,11 @@
 <body>
   <button onclick="update_draw('journaux_mag_online')">Les journaux ou magazines d'information imprimés</button>
   <button onclick="update_draw('journaux_mag_papier')">Les journaux ou magazines d'information en ligne</button>
+  <button onclick="update_draw('Les_réseaux_sociaux_en_ligne_et_les_applications_de_messagerie')">Les réseaux sociaux en ligne et les applications de messagerie</button>
+  Les_réseaux_sociaux_en_ligne_et_les_applications_de_messagerie
+  <button onclick="update_radar_chart('DE')">Change radar chart</button>
+
+  <svg class='barChart'></svg>
 
   <script>
     //---------------------------------------- VARIABLES ----------------------------------------
@@ -53,25 +58,45 @@
       'UK': "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Flag_of_the_United_Kingdom.svg/1200px-Flag_of_the_United_Kingdom.svg.png",
       'SE': "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Flag_of_Sweden.svg/1200px-Flag_of_Sweden.svg.png",
     }
-    var margin = { top: 40, right: 20, bottom: 30, left: 20 };
     var window_width = 960;
-    var window_height = 700;
-    var width = window_width - margin.left - margin.right;
-    var height = window_height - margin.top - margin.bottom;
-    var flag_space = 40;
-    var flag_margin = 5;
-    var top_n = 4;
-    var rect_height = (height - 300) / (top_n + 5);
+    var window_height = 600;
+    var margin = {
+      top: 0.05 * window_height,
+      right: 0.05 * window_width,
+      bottom: 0.05 * window_height,
+      left: 0.05 * window_width
+    };
+
+    var svg_width = window_width - margin.left - margin.right;
+    var svg_height = window_height - margin.top - margin.bottom;
+
+    var bar_chart_width = 0.6 * svg_width;
+    var bar_chart_height = svg_height;
+
+    var radar_chart_width = (1 - 0.6) * svg_width;
+    var radar_chart_height = svg_height;
+
+    var x_middle_radar_chart = margin.left + bar_chart_width + radar_chart_width / 2;
+    var y_middle_radar_chart = margin.top + radar_chart_height / 2;
+
+    //var height = window_height - margin.top - margin.bottom;
+    var flag_space = 0.1 * bar_chart_width;
+    var flag_margin = 0.2 * flag_space;
+
+    var top_n = 10;
+
+    var rect_height = 0.6 * bar_chart_height / (2 * top_n + 1);
+
     var answers = ["Totally trust", "Tend to trust", "DKNA", "Tend not to trust", "Do not trust at all"];
 
     // ---------------------------------------- SCALES ----------------------------------------
     var horizontal_bar_scale = d3.scaleLinear()
       .domain([0, 1])
-      .range([margin.left + flag_space, width + margin.left])
+      .range([margin.left + flag_space, bar_chart_width + margin.left])
 
     var vertical_scale = d3.scaleLinear()
       .domain([0, top_n * 2 + 2])
-      .range([margin.top, height + margin.top])
+      .range([margin.top, bar_chart_height + margin.top])
 
     var color_scale = d3.scaleLinear().domain([0, 4]).range(['green', 'red']);
 
@@ -111,26 +136,30 @@
 
     // ---------------------------------------- SVG ----------------------------------------
     // Ajout d'un element svg au body
-    var svg = d3.select("body").append("svg")
+    var svg = d3.select(".barChart")
       .attr("width", window_width)
       .attr("height", window_height)
       .append("g")
 
     function draw_rect(data) {
 
+      // -------------------BAR CHART------------------------------
+      console.log(answers)
+      console.log(data)
       var stack = d3.stack().keys(answers);
       stack.value(function (d, key) {
         return +d[key];
       });
-
       var layers = stack(data);
+      console.log(layers)
 
+      // The bars
       svg.selectAll("g")
         .data(layers)
         .enter().append("g")
         .style("fill", function (d, i_ans) { return color_scale(i_ans); })
         .selectAll("rect")
-        .data(function (d) { return d; })
+        .data(function (d) { return d })
         .enter().append("rect")
         .attr("x", horizontal_bar_scale(0))
         .attr("y", function (d, i_country) { return vertical_scale(i_country_to_vertical_i(data, i_country)); })
@@ -142,8 +171,13 @@
         })
         .on("mouseout", function () {
           d3.selectAll('rect').style("fill-opacity", "1");
-        });
+        })
+        .on("click", function (d, i_country) {
+          console.log("à coder")
+        })
+        ;
 
+      // Animation when the page is loaded
       svg.selectAll("g")
         .data(layers)
         .selectAll("rect")
@@ -153,7 +187,7 @@
         .attr("width", function (d, i_country) { return horizontal_bar_scale(d[1]) - horizontal_bar_scale(d[0]); })
         .attr("x", function (d) { return horizontal_bar_scale(d[0]); })
 
-
+      // ------------------------FLAGS-------------------------
       svg.selectAll('flag').data(data).enter()
         .append("svg:image")
         .attr("x", margin.left)
@@ -169,13 +203,10 @@
         draw_rect(data)
       })
     }
-
     draw('journaux_mag_online');
 
-
-
     function update_draw(media_type) {
-      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/master/data/' + media_type + '.csv', function (data) {
+      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data/' + media_type + '.csv', function (data) {
         var stack = d3.stack().keys(answers);
         stack.value(function (d, key) {
           return +d[key];
@@ -188,7 +219,7 @@
           .selectAll("rect")
           .data(function (d) { return d; })
           .transition()
-          .duration(1000)
+          .duration(600)
           .attr("x", function (d) { return horizontal_bar_scale(d[0]); })
           .attr("y", function (d, i_country) { return vertical_scale(i_country_to_vertical_i(data, i_country)); })
           .attr("width", function (d, i_country) { return horizontal_bar_scale(d[1]) - horizontal_bar_scale(d[0]); })
@@ -196,10 +227,79 @@
 
         svg.selectAll('image').data(data)
           .transition()
-          .duration(1000)
+          .duration(600)
           .attr("y", function (d, i_country) { return vertical_scale(i_country_to_vertical_i(data, i_country)); })
           .attr("height", function (d, i_country) { return compute_rect_height(data, i_country); })
       })
     }
+
+    // -------------------------RADAR CHART---------------------------
+    // Variables
+    var nb_features = 7;
+    var size = 100;
+    var devices = ["Desk Computer", "Laptop", "Mobile Phone", "Landline phone", "Internet connection at home", "Tablet", "At least one device"]
+
+
+    // Draw the baselines
+    for (var i = 0; i < nb_features; i++) {
+      svg.append('line')
+        .attr("x1", x_middle_radar_chart)
+        .attr("y1", y_middle_radar_chart)
+        .attr("x2", x_middle_radar_chart + size * Math.cos(2 * i * Math.PI / nb_features - Math.PI / 2))
+        .attr("y2", y_middle_radar_chart + size * Math.sin(2 * i * Math.PI / nb_features - Math.PI / 2))
+        .style("stroke", "black")
+        .style("stroke-width", "2px");
+    }
+
+    // Function
+    function point_on_radar(i, x) {
+      return [
+        x_middle_radar_chart + size * x * Math.cos(2 * i * Math.PI / nb_features - Math.PI / 2),
+        y_middle_radar_chart + size * x * Math.sin(2 * i * Math.PI / nb_features - Math.PI / 2)
+      ]
+    }
+
+    d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data_devices.csv', function (data) {
+      var my_data = data.filter(function (d) {
+        return d["Country"] == "FR" && d["Media"] == "Les journaux ou magazines d'information en ligne" && d["Answer"] == "Tend to trust";
+      })[0]
+
+      var data = devices.map(function (device, i) { return { 'val': +my_data[device] }; })
+
+      svg.selectAll("polygon")
+        .data([data])
+        .enter()
+        .append("polygon")
+        .attr("points", function (da) {
+          return da.map(function (d, i) {
+            return point_on_radar(i, d.val).join(",")
+          }).join(' ')
+        })
+        .attr("stroke", "red")
+        .attr('fill', 'red')
+        .attr('fill-opacity', '0.3')
+        .attr("stroke-width", 1);
+    })
+
+    function update_radar_chart(country, media, answer) {
+      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data_devices.csv', function (data) {
+        var my_data = data.filter(function (d) {
+          return d["Country"] == country && d["Media"] == media && d["Answer"] == answer;
+        })[0]
+
+        var data = devices.map(function (device, i) { return { 'val': +my_data[device] }; })
+
+        svg.selectAll("polygon")
+          .data([data])
+          .attr("points", function (da) {
+            return da.map(function (d, i) {
+              return point_on_radar(i, d.val).join(",")
+            }).join(' ')
+          });
+
+
+      })
+    }
+
   </script>
 </body>
