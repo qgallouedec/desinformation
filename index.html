@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <style>
-    p {
+    .title {
       font-family: Courier New, monospace;
       font-size: 25pt;
       margin: auto;
-      padding: 20px;
+      padding: 0px;
       color: white;
     }
 
@@ -55,8 +55,8 @@
 </head>
 
 <body>
-  <div>
-    <p>Dans quelle mesure faites vous confiances aux médias ?</p>
+  <div class="title">
+    <p>Dans quelle mesure faites-vous confiance aux médias ?</p>
   </div>
   <div class="buttons">
     <button class="media_button journaux_imprimes" onclick="update_draw('journaux_imprimes')">Journaux imprimés</button>
@@ -103,7 +103,7 @@
       'SE': "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Flag_of_Sweden.svg/1200px-Flag_of_Sweden.svg.png",
     }
     var window_width = window.innerWidth;
-    var window_height = 600;
+    var window_height = 550;
     var margin = {
       top: 0.05 * window_height,
       right: 0.05 * window_width,
@@ -278,6 +278,22 @@
           .text(str_rank(27 - i_rank))
       }
 
+      svg.append("text")
+          .attr("x", horizontal_bar_scale(0))
+          .attr("y", vertical_scale(2 * top_n + 2.2 ))
+          .attr("font-family", "Courier New, monospace")
+          .attr("font-size", "14pt")
+          .style("fill", "white")
+          .text("J'y crois")
+
+          svg.append("text")
+          .attr("x", horizontal_bar_scale(0.72))
+          .attr("y", vertical_scale(2 * top_n + 2.2 ))
+          .attr("font-family", "Courier New, monospace")
+          .attr("font-size", "14pt")
+          .style("fill", "white")
+          .text("Je n'y crois pas")
+
 
     }
 
@@ -340,7 +356,7 @@
         .attr("x2", x_middle_radar_chart + size * Math.cos(2 * i * Math.PI / nb_features - Math.PI / 2))
         .attr("y2", y_middle_radar_chart + size * Math.sin(2 * i * Math.PI / nb_features - Math.PI / 2))
         .style("stroke", "white")
-        .style("stroke-width", "2px");
+        .style("stroke-width", "3px");
 
       svg.append("text")
         .attr("x", x_middle_radar_chart + size * 1.1 * Math.cos(2 * i * Math.PI / nb_features - Math.PI / 2) - dx[i])
@@ -371,6 +387,7 @@
         .data([data])
         .enter()
         .append("polygon")
+        .attr("class", "hello")
         .attr("points", function (da) {
           return da.map(function (d, i) {
             return point_on_radar(i, d.val).join(",")
@@ -379,7 +396,26 @@
         .attr("stroke", "#930E0E")
         .attr('fill', "#930E0E")
         .attr('fill-opacity', '0.3')
-        .attr("stroke-width", 1);
+        .attr("stroke-width", 1)
+
+      let range = n => Array.from(Array(n).keys())
+      let middle_points = range(nb_features).map(function (i) {
+        return point_on_radar(i, 0.5).join(",")
+      }).join(' ')
+      let externat_points = range(nb_features).map(function (i) {
+        return point_on_radar(i, 1).join(",")
+      }).join(' ')
+
+      // svg.append("polygon")
+      //   .attr("points", middle_points)
+      //   .attr("stroke", "white")
+      //   .attr('fill', "none")
+      //   .attr("stroke-width", 0.5);
+      // svg.append("polygon")
+      //   .attr("points", externat_points)
+      //   .attr("stroke", "white")
+      //   .attr('fill', "none")
+      //   .attr("stroke-width", 0.5);
     })
 
     function update_radar_chart(country, media, answer) {
@@ -391,7 +427,7 @@
 
         var data = devices.map(function (device, i) { return { 'val': +my_data[device] }; })
 
-        svg.selectAll("polygon")
+        svg.select(".hello")
           .data([data])
           .transition()
           .duration(1000)
@@ -400,9 +436,6 @@
               return point_on_radar(i, d.val).join(",")
             }).join(' ')
           })
-          
-
-
       })
     }
 
