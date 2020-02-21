@@ -2,6 +2,8 @@
 
 [Lien vers la visualisation](https://quenting44.github.io/desinformation/)
 
+[Lien vers les slides de présentation](https://docs.google.com/presentation/d/1HSSiuJKM1adAGhVeB1aFUxQWRnPmasRcI1YTkMCGcn4/edit#slide=id.g6f37298408_0_5)
+
 Référence projet : ```CCC```
 
 ## Données:
