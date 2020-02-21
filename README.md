@@ -1,6 +1,8 @@
-# Projet de visualisation interractive de données
+# La désinformation - Projet de visualisation interractive de données
 
 [Lien vers la visualisation](https://quenting44.github.io/desinformation/)
+
+Référence projet : '''CCC'''
 
 ## Données:
 
