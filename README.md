@@ -2,7 +2,7 @@
 
 [Lien vers la visualisation](https://quenting44.github.io/desinformation/)
 
-Référence projet : '''CCC'''
+Référence projet : ```CCC```
 
 ## Données:
 
