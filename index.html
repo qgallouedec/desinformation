@@ -120,21 +120,17 @@
     var radar_chart_width = (1 - 0.6) * svg_width;
     var radar_chart_height = svg_height;
 
-    var x_middle_radar_chart = margin.left + bar_chart_width + radar_chart_width / 2;
-    var y_middle_radar_chart = margin.top + radar_chart_height / 2;
-
     //var height = window_height - margin.top - margin.bottom;
     var flag_space = 0.1 * bar_chart_width;
     var flag_margin = 0.2 * flag_space;
     var rank_space = 0.08 * bar_chart_width;
 
-    var top_n = 5;
+    var top_n = 8;
 
     var rect_height = 0.6 * bar_chart_height / (2 * top_n + 1);
 
     var answers = ["Totally trust", "Tend to trust", "DKNA", "Tend not to trust", "Do not trust at all"];
     var countries = ["UE29", "BE", "BG", "CZ", "DK", "DE", "EE", "IE", "EL", "ES", "FR", "HR", "IT", "CY", "LV", "LT", "LU", "HU", "MT", "NL", "AT", "PL", "PT", "RO", "SI", "SK", "FI", "SE", "UK"]
-    console.log(countries.length)
     var medias = ['journaux_imprimes', 'journaux_en_ligne', 'reseaux_sociaux', 'television', 'radio']
     var media = medias[0]
 
@@ -230,8 +226,6 @@
           var answer = this.parentNode.className["baseVal"];
           update_radar_chart(countries[i_country], media, answer)
         });
-
-
       // Animation when the page is loaded
       svg.selectAll("g")
         .data(layers)
@@ -341,6 +335,9 @@
 
     // -------------------------RADAR CHART---------------------------
     // Variables
+
+    var x_middle_radar_chart = margin.left + bar_chart_width + radar_chart_width / 2;
+    var y_middle_radar_chart = margin.top + 3 / 5 * radar_chart_height;
     var nb_features = 7;
     var size = 150;
     var devices = ["Desk Computer", "Laptop", "Mobile Phone", "Landline phone", "Internet connection at home", "Tablet", "At least one device"]
@@ -376,26 +373,40 @@
     }
 
     d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data/data_devices.csv', function (data) {
+      country = "FR"
       var my_data = data.filter(function (d) {
-        return d["Country"] == countries[5] && d["Media"] == medias[0] && d["Answer"] == answers[0];
-      })[0]
+        return d["Country"] == country && d["Media"] == medias[0] //&& d["Answer"] == answers[0];
+      })
 
-      var data = devices.map(function (device, i) { return { 'val': +my_data[device] }; })
+      var data = answers.map(function (answer, i_ans) {
+        return devices.map(function (device, i_device) {
+          return { 'val': +my_data[i_ans][device] };
+        })
+      })
 
       svg.selectAll("polygon")
-        .data([data])
+        .data(data)
         .enter()
         .append("polygon")
-        .attr("class", "hello")
-        .attr("points", function (da) {
+        .attr("points", function (da, i_ans) {
           return da.map(function (d, i) {
             return point_on_radar(i, d.val).join(",")
           }).join(' ')
         })
-        .attr("stroke", "#930E0E")
-        .attr('fill', "#930E0E")
+        .attr("stroke", function (d, i_ans) { return color_scale[i_ans]; })
+        .style("fill", function (d, i_ans) { return color_scale[i_ans]; })
         .attr('fill-opacity', '0.3')
         .attr("stroke-width", 1)
+
+      // svg.append("text")
+      //   .attr("class", "coutry_title")
+      //   .attr("x", margin.left + bar_chart_width + 0.1 * radar_chart_width)
+      //   .attr("y", 0.20 * radar_chart_height)
+      //   .attr("font-family", "Courier New, monospace")
+      //   .attr("font-size", "16pt")
+      //   .style("fill", "white")
+      //   .style("dominant-baseline", "middle")
+      //   .text(country)
 
       let range = n => Array.from(Array(n).keys())
       let middle_points = range(nb_features).map(function (i) {
@@ -404,30 +415,26 @@
       let externat_points = range(nb_features).map(function (i) {
         return point_on_radar(i, 1).join(",")
       }).join(' ')
-
-      // svg.append("polygon")
-      //   .attr("points", middle_points)
-      //   .attr("stroke", "white")
-      //   .attr('fill', "none")
-      //   .attr("stroke-width", 0.5);
-      // svg.append("polygon")
-      //   .attr("points", externat_points)
-      //   .attr("stroke", "white")
-      //   .attr('fill', "none")
-      //   .attr("stroke-width", 0.5);
     })
 
     function update_radar_chart(country, media, answer) {
       d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data/data_devices.csv', function (data) {
-        console.log(country, media, answer)
+
         var my_data = data.filter(function (d) {
-          return d["Country"] == country && d["Media"] == media && d["Answer"] == answer;
-        })[0]
+          return d["Country"] == country && d["Media"] == media // && d["Answer"] == answer;
+        })
 
-        var data = devices.map(function (device, i) { return { 'val': +my_data[device] }; })
+        svg.select(".coutry_title")
+          .text(country)
 
-        svg.select(".hello")
-          .data([data])
+        var data = answers.map(function (answer, i_ans) {
+          return devices.map(function (device, i_device) {
+            return { 'val': +my_data[i_ans][device] };
+          })
+        })
+
+        svg.selectAll("polygon")
+          .data(data)
           .transition()
           .duration(1000)
           .attr("points", function (da) {
