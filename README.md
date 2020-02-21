@@ -9,4 +9,7 @@ Lien de téléchargement : [Data Europa](https://data.europa.eu/euodp/en/data/da
 ## Présentation
 (au 21/02/2020)
 
+![Visualisation](https://raw.githubusercontent.com/quenting44/desinformation/master/docs/visu.gif)
+
+
 
