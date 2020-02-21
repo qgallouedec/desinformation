@@ -18,12 +18,12 @@ devices = ["Desk Compu-\nter", "Laptop", "Mobile Phone", "Landline phone",
     "Internet connection at home", "Tablet", "At least one device"]
 
 def parse_path(country, media):
-    return 'data/brut/fl_464_Volume_C_xls/fl_464_Volume_C_{}/Q1.{}-Tableau 1.csv'.format(country, medias.index(media)+1)
+    return 'data/brut/fl_464_Volume_B/Q1.{}-Tableau 1.csv'.format(medias.index(media)+1)
 
 
-with open('data/brut/fl_464_Volume_C_xls/fl_464_Volume_C_AT/Q1.1-Tableau 1.csv') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=';')
-    data = list(spamreader)
+# with open('data/brut/fl_464_Volume_C_xls/fl_464_Volume_C_AT/Q1.1-Tableau 1.csv') as csvfile:
+#     spamreader = csv.reader(csvfile, delimiter=';')
+#     data = list(spamreader)
 
 
 def find_col(data, device):
@@ -57,17 +57,20 @@ def get_total_respondants(country, media, answer):
     i_col = find_col(data, country)
 
     return data[i_row][i_col]
-rows=[]
-for country in countries:
-    for media in medias:
-        for answer in answers:
-            for_devices = []
-            tot = int(get_total_respondants(country, media, answer))
-            for device in devices:
-                for_devices.append(int(get_number_respondants(country, media, answer, device))/tot)
-            rows.append([country, media, answer] + for_devices)
 
-with open('data_devices.csv', 'w', newline='') as csvfile:
+rows=[]
+
+#for country in countries:
+country = "UE28"
+for media in medias:
+    for answer in answers:
+        for_devices = []
+        tot = int(get_total_respondants(country, media, answer))
+        for device in devices:
+            for_devices.append(int(get_number_respondants(country, media, answer, device))/tot)
+        rows.append([country, media, answer] + for_devices)
+
+with open('data_devices2.csv', 'w', newline='') as csvfile:
     spamwriter = csv.writer(csvfile, delimiter=',')
     spamwriter.writerow(['', '', '']+devices)
     for row in rows:
