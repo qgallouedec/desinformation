@@ -292,7 +292,7 @@
 
     // ---------------------------------------- SHAPES ----------------------------------------
     function draw(media_type) {
-      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data/' + media_type + '.csv', function (data) {
+      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/master/data/' + media_type + '.csv', function (data) {
         draw_rect(data)
       })
     }
@@ -306,7 +306,7 @@
       }
       selected_button.item(0).style.backgroundColor = "rgb(0, 21, 78)";
 
-      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data/' + media_type + '.csv', function (data) {
+      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/master/data/' + media_type + '.csv', function (data) {
         var stack = d3.stack().keys(answers);
         stack.value(function (d, key) {
           return +d[key];
@@ -372,7 +372,7 @@
       ]
     }
 
-    d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data/data_devices.csv', function (data) {
+    d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/master/data/data_devices.csv', function (data) {
       country = "FR"
       var my_data = data.filter(function (d) {
         return d["Country"] == country && d["Media"] == medias[0] //&& d["Answer"] == answers[0];
@@ -418,7 +418,7 @@
     })
 
     function update_radar_chart(country, media, answer) {
-      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/quentin/data/data_devices.csv', function (data) {
+      d3.csv('https://raw.githubusercontent.com/quenting44/desinformation/master/data/data_devices.csv', function (data) {
 
         var my_data = data.filter(function (d) {
           return d["Country"] == country && d["Media"] == media // && d["Answer"] == answer;
