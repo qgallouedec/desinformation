@@ -64,7 +64,8 @@
     <button class="media_button reseaux_sociaux" onclick="update_draw('reseaux_sociaux')">Réseaux sociaux</button>
     <button class="media_button television" onclick="update_draw('television')">Télévision</button>
     <button class="media_button radio" onclick="update_draw('radio')">Radio</button>
-
+    <button class="Toggle significant" onclick="toggle()">Montre ou Chacher</button>
+    
     <!-- <button onclick="update_radar_chart('DE')">Change radar chart</button> -->
   </div>
   <svg class='barChart'></svg>
@@ -297,7 +298,8 @@
       })
     }
     draw(medias[0]);
-
+    function toggle()
+    {}
     function update_draw(media_type) {
       var list_buttons = document.getElementsByClassName("media_button");
       var selected_button = document.getElementsByClassName(media_type);
