@@ -256,7 +256,8 @@
         }
       }
       for (var i_rank = 0; i_rank < top_n; i_rank++) {
-        svg.append("text")
+        svg.selectall("rankup")
+          .append("text")
           .attr("x", margin.left)
           .attr("y", (vertical_scale(i_rank) + vertical_scale(i_rank + 1)) / 2)
           .attr("font-family", "Courier New, monospace")
@@ -265,7 +266,8 @@
           .text(str_rank(i_rank))
 
         // Affichage des rangs
-        svg.append("text")
+        svg.selectall("rankdown")
+          .append("text")
           .attr("x", margin.left)
           .attr("y", (vertical_scale(2 * top_n + 1 - i_rank) + vertical_scale(2 * top_n - i_rank + 2)) / 2)
           .attr("font-family", "Courier New, monospace")
@@ -345,7 +347,8 @@
           .attr("height", function (d, i_country) { return compute_rect_height(data, i_country); })
         //Here 
       for (var i_rank = 0; i_rank < top_n; i_rank++) {
-        svg.append("text")
+        svg.append("text").transition()
+          .duration(600)
           .attr("x", margin.left)
           .attr("y", (vertical_scale(i_rank) + vertical_scale(i_rank + 1)) / 2)
           .attr("font-family", "Courier New, monospace")
@@ -354,7 +357,8 @@
           .text(str_rank(i_rank))
 
         // Affichage des rangs
-        svg.append("text")
+        svg.append("text").transition()
+          .duration(600)
           .attr("x", margin.left)
           .attr("y", (vertical_scale(2 * top_n + 1 - i_rank) + vertical_scale(2 * top_n - i_rank + 2)) / 2)
           .attr("font-family", "Courier New, monospace")
