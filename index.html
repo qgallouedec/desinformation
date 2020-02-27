@@ -64,7 +64,7 @@
     <button class="media_button reseaux_sociaux" onclick="update_draw('reseaux_sociaux')">Réseaux sociaux</button>
     <button class="media_button television" onclick="update_draw('television')">Télévision</button>
     <button class="media_button radio" onclick="update_draw('radio')">Radio</button>
-    <button class="media_button significant" onclick="toggle()">Montre ou Chacher</button>
+    <button class="Toggle significant" onclick="toggle()">Montre ou Chacher</button>
     
     <!-- <button onclick="update_radar_chart('DE')">Change radar chart</button> -->
   </div>
@@ -126,7 +126,7 @@
     var flag_margin = 0.2 * flag_space;
     var rank_space = 0.08 * bar_chart_width;
 
-    var top_n = 8;
+    var top_n = 5;
 
     var rect_height = 0.6 * bar_chart_height / (2 * top_n + 1);
 
@@ -298,8 +298,12 @@
       })
     }
     draw(medias[0]);
+    
     function toggle()
-    {}
+    {
+    top_n = 10;
+    }
+    
     function update_draw(media_type) {
       var list_buttons = document.getElementsByClassName("media_button");
       var selected_button = document.getElementsByClassName(media_type);
