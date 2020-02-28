@@ -298,18 +298,7 @@
       })
     }
     draw(medias[0]);
-    
-    function toggle()
-    {
-      if (top_n!==8){
-        top_n = 8;
-      }else
-      {
-        top_n = 16;
-      }     
-      draw_rect(data);
-      
-    }
+   
     
     function update_draw(media_type) {
       var list_buttons = document.getElementsByClassName("media_button");
@@ -346,9 +335,18 @@
           .attr("height", function (d, i_country) { return compute_rect_height(data, i_country); })
 
       })
-      
     }
 
+    function toggle()
+    {
+        if (top_n!==8){
+        top_n = 8;
+        }else
+      {
+        top_n = 16;
+      }     
+      draw_rect(data);
+      }
     // -------------------------RADAR CHART---------------------------
     // Variables
 
