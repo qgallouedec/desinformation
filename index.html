@@ -304,7 +304,7 @@
       var list_buttons = document.getElementsByClassName("media_button");
       var selected_button = document.getElementsByClassName(media_type);
 
-      for (var i_button = 0; i_button < list_buttons.length; i_button++) {
+      for (var i_button = 0; i_button < list_buttons.length-1; i_button++) {
         list_buttons.item(i_button).style.backgroundColor = "rgb(0, 3, 31)";
       }
       selected_button.item(0).style.backgroundColor = "rgb(0, 21, 78)";
