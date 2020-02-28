@@ -256,8 +256,7 @@
         }
       }
       for (var i_rank = 0; i_rank < top_n; i_rank++) {
-        svg.selectall("rankup")
-          .append("text")
+        svg.append("text")
           .attr("x", margin.left)
           .attr("y", (vertical_scale(i_rank) + vertical_scale(i_rank + 1)) / 2)
           .attr("font-family", "Courier New, monospace")
