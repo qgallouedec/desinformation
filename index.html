@@ -339,10 +339,14 @@
 
     function toggle()
     {
-        if (top_n!==8){
+      var togglebuttons = document.getElementsByClassName("significant");
+        
+      if (top_n!==8){
         top_n = 8;
+        togglebuttons.style.backgroundColor = "rgb(0, 3, 31)";
         }else
       {
+        togglebuttons.style.backgroundColor = "rgb(0, 21, 78)";
         top_n = 16;
       }
       vertical_scale = d3.scaleLinear()
