@@ -308,12 +308,18 @@
         top_n = 16;
       }     
       //Here 
-      for (var i_rank = 0; i_rank < top_n; i_rank++) {
         svg.selectAll("text").remove()
+for (var i_rank = 0; i_rank < top_n; i_rank++) {
+        svg.append("text")
+          .attr("x", margin.left)
+          .attr("y", (vertical_scale(i_rank) + vertical_scale(i_rank + 1)) / 2)
+          .attr("font-family", "Courier New, monospace")
+          .attr("font-size", "14pt")
+          .style("fill", "white")
+          .text(str_rank(i_rank))
 
         // Affichage des rangs
-        svg.selectAll("text").transition()
-          .duration(600)
+        svg.append("text")
           .attr("x", margin.left)
           .attr("y", (vertical_scale(2 * top_n + 1 - i_rank) + vertical_scale(2 * top_n - i_rank + 2)) / 2)
           .attr("font-family", "Courier New, monospace")
@@ -321,6 +327,23 @@
           .style("fill", "white")
           .text(str_rank(27 - i_rank))
       }
+      // Affichage j'y crois, j'y crois pas
+      svg.append("text")
+        .attr("x", horizontal_bar_scale(0))
+        .attr("y", vertical_scale(2 * top_n + 2.2))
+        .attr("font-family", "Courier New, monospace")
+        .attr("font-size", "14pt")
+        .style("fill", "white")
+        .text("J'y crois")
+
+      svg.append("text")
+        .attr("x", horizontal_bar_scale(0.72))
+        .attr("y", vertical_scale(2 * top_n + 2.2))
+        .attr("font-family", "Courier New, monospace")
+        .attr("font-size", "14pt")
+        .style("fill", "white")
+        .text("Je n'y crois pas")
+  
         //to here
       
     }
