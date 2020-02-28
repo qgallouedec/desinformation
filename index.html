@@ -344,7 +344,10 @@
         }else
       {
         top_n = 16;
-      }     
+      }
+      vertical_scale = d3.scaleLinear()
+      .domain([0, top_n * 2 + 2])
+      .range([margin.top, bar_chart_height + margin.top])
       draw_rect(data);
       }
     // -------------------------RADAR CHART---------------------------
