@@ -64,7 +64,7 @@
     <button class="media_button reseaux_sociaux" onclick="update_draw('reseaux_sociaux')">Réseaux sociaux</button>
     <button class="media_button television" onclick="update_draw('television')">Télévision</button>
     <button class="media_button radio" onclick="update_draw('radio')">Radio</button>
-    <button class="nom_toggle significant" onclick="toggle()">Montre ou Chacher</button>
+    <button class="nom_toggle significant" onclick="toggle()">Tous/top 8</button>
 
     <!-- <button onclick="update_radar_chart('DE')">Change radar chart</button> -->
   </div>
@@ -265,8 +265,7 @@
           .text(str_rank(i_rank))
 
         // Affichage des rangs
-        svg.selectall("rankdown")
-          .append("text")
+        svg.append("text")
           .attr("x", margin.left)
           .attr("y", (vertical_scale(2 * top_n + 1 - i_rank) + vertical_scale(2 * top_n - i_rank + 2)) / 2)
           .attr("font-family", "Courier New, monospace")
@@ -346,7 +345,7 @@
           .attr("height", function (d, i_country) { return compute_rect_height(data, i_country); })
         //Here 
       for (var i_rank = 0; i_rank < top_n; i_rank++) {
-        svg.append("text").transition()
+        svg.selectAll("text").transition()
           .duration(600)
           .attr("x", margin.left)
           .attr("y", (vertical_scale(i_rank) + vertical_scale(i_rank + 1)) / 2)
@@ -356,7 +355,7 @@
           .text(str_rank(i_rank))
 
         // Affichage des rangs
-        svg.append("text").transition()
+        svg.selectAll("text").transition()
           .duration(600)
           .attr("x", margin.left)
           .attr("y", (vertical_scale(2 * top_n + 1 - i_rank) + vertical_scale(2 * top_n - i_rank + 2)) / 2)
