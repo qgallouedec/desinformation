@@ -10,7 +10,7 @@
   <style>
     .title {
       font-family: Courier New, monospace;
-      font-size: 25pt;
+      font-size: 22pt;
       margin: auto;
       padding: 0px;
       color: white;
@@ -26,7 +26,7 @@
     }
 
     .buttons {
-      height: 60px;
+      height: 65px;
       display: flex;
       flex-direction: row;
       justify-content: space-evenly;
@@ -38,7 +38,7 @@
       /* Green */
       border: none;
       font-family: Courier New, monospace;
-      font-size: 18pt;
+      font-size: 16pt;
       color: white;
       padding: 15px 32px;
       text-align: center;
@@ -68,6 +68,7 @@
     <button class="media_button reseaux_sociaux" onclick="update_draw('reseaux_sociaux')">Réseaux sociaux</button>
     <button class="media_button television" onclick="update_draw('television')">Télévision</button>
     <button class="media_button radio" onclick="update_draw('radio')">Radio</button>
+    <button class="nom_toggle significant" onclick="toggle()">Montre tous</button>
 
     <!-- <button onclick="update_radar_chart('DE')">Change radar chart</button> -->
   </div>
@@ -107,7 +108,7 @@
       'SE': "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Flag_of_Sweden.svg/1200px-Flag_of_Sweden.svg.png",
     }
     var window_width = window.innerWidth;
-    var window_height = 550;
+    var window_height = 1000;
     var margin = {
       top: 0.05 * window_height,
       right: 0.05 * window_width,
@@ -301,10 +302,12 @@
       })
     }
     draw(medias[0]);
-
+   
+    
     function update_draw(media_type) {
       var list_buttons = document.getElementsByClassName("media_button");
       var selected_button = document.getElementsByClassName(media_type);
+
       for (var i_button = 0; i_button < list_buttons.length; i_button++) {
         list_buttons.item(i_button).style.backgroundColor = "rgb(0, 3, 31)";
       }
@@ -334,9 +337,27 @@
           .duration(600)
           .attr("y", function (d, i_country) { return vertical_scale(i_country_to_vertical_i(data, i_country)); })
           .attr("height", function (d, i_country) { return compute_rect_height(data, i_country); })
+
       })
     }
 
+    function toggle()
+    {
+      var togglebuttons = document.getElementsByClassName("significant");
+        
+      if (top_n!==8){
+        top_n = 8;
+        togglebuttons.item(0).style.backgroundColor = "rgb(0, 3, 31)";
+        }else
+      {
+        togglebuttons.item(0).style.backgroundColor = "rgb(0, 21, 78)";
+        top_n = 16;
+      }
+      vertical_scale = d3.scaleLinear()
+      .domain([0, top_n * 2 + 2])
+      .range([margin.top, bar_chart_height + margin.top])
+      draw_rect(data);
+      }
     // -------------------------RADAR CHART---------------------------
     // Variables
 
